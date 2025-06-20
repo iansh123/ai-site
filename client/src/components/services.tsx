@@ -27,24 +27,24 @@ export default function Services() {
   ];
 
   return (
-    <section id="services" className="py-24 px-6 bg-gray-50">
+    <section id="services" className="py-32 px-6 bg-muted/30">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light mb-6 text-gray-900">
+        <div className="text-center mb-20">
+          <h2 className="text-5xl md:text-6xl font-bold mb-8 text-foreground tracking-tight">
             Our Services
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed">
             Discover how our AI solutions can transform your business operations.
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
-            <div key={index} className="bg-white rounded-lg p-8 shadow-sm">
-              <h3 className="text-xl font-medium mb-4 text-gray-900">
+            <div key={index} className="bg-card rounded-2xl p-8 border border-border hover:border-muted-foreground/20 transition-all duration-300 hover:scale-105">
+              <h3 className="text-2xl font-bold mb-6 text-foreground">
                 {service.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-lg">
                 {service.description}
               </p>
             </div>

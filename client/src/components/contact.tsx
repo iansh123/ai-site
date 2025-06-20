@@ -53,21 +53,21 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-24 px-6 bg-gray-50">
-      <div className="container mx-auto max-w-2xl">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light mb-6 text-gray-900">
+    <section id="contact" className="py-32 px-6 bg-muted/30">
+      <div className="container mx-auto max-w-3xl">
+        <div className="text-center mb-20">
+          <h2 className="text-5xl md:text-6xl font-bold mb-8 text-foreground tracking-tight">
             Get In Touch
           </h2>
-          <p className="text-xl text-gray-600 font-light">
+          <p className="text-xl md:text-2xl text-muted-foreground font-medium leading-relaxed">
             Ready to transform your business with AI automation? Let's discuss your needs.
           </p>
         </div>
         
-        <div className="bg-white rounded-lg p-8 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-card rounded-3xl p-12 border border-border shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="name" className="text-lg font-semibold text-foreground mb-3 block">
                 Name
               </Label>
               <Input
@@ -76,13 +76,13 @@ export default function Contact() {
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Your full name"
-                className="mt-1"
+                className="h-14 text-lg rounded-xl border-border bg-background"
                 required
               />
             </div>
             
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="text-lg font-semibold text-foreground mb-3 block">
                 Email
               </Label>
               <Input
@@ -91,13 +91,13 @@ export default function Contact() {
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder="your.email@company.com"
-                className="mt-1"
+                className="h-14 text-lg rounded-xl border-border bg-background"
                 required
               />
             </div>
             
             <div>
-              <Label htmlFor="message" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="message" className="text-lg font-semibold text-foreground mb-3 block">
                 Message
               </Label>
               <Textarea
@@ -105,15 +105,15 @@ export default function Contact() {
                 value={formData.message}
                 onChange={(e) => handleInputChange("message", e.target.value)}
                 placeholder="Tell us about your automation needs..."
-                rows={4}
-                className="mt-1"
+                rows={6}
+                className="text-lg rounded-xl border-border bg-background resize-none"
                 required
               />
             </div>
             
             <Button 
               type="submit" 
-              className="w-full bg-gray-900 hover:bg-gray-800"
+              className="w-full h-16 bg-foreground text-background hover:bg-muted-foreground text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-105"
               disabled={contactMutation.isPending}
             >
               {contactMutation.isPending ? "Sending..." : "Send Message"}

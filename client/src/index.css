@@ -1,48 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(0, 0%, 9%);
-  --muted: hsl(0, 0%, 96%);
-  --muted-foreground: hsl(0, 0%, 45%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(0, 0%, 9%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(0, 0%, 9%);
-  --border: hsl(0, 0%, 89%);
-  --input: hsl(0, 0%, 89%);
-  --primary: hsl(0, 0%, 9%);
-  --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(0, 0%, 96%);
-  --secondary-foreground: hsl(0, 0%, 9%);
-  --accent: hsl(0, 0%, 96%);
-  --accent-foreground: hsl(0, 0%, 9%);
-  --destructive: hsl(0, 84%, 60%);
+  --background: hsl(0, 0%, 3%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 10%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --popover: hsl(0, 0%, 3%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(0, 0%, 6%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 12%);
+  --input: hsl(0, 0%, 12%);
+  --primary: hsl(0, 0%, 98%);
+  --primary-foreground: hsl(0, 0%, 9%);
+  --secondary: hsl(0, 0%, 12%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(0, 0%, 12%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62%, 30%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(0, 0%, 9%);
+  --ring: hsl(0, 0%, 83%);
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: hsl(0, 0%, 4%);
+  --background: hsl(0, 0%, 3%);
   --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(0, 0%, 15%);
-  --muted-foreground: hsl(0, 0%, 64%);
-  --popover: hsl(0, 0%, 4%);
+  --muted: hsl(0, 0%, 10%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --popover: hsl(0, 0%, 3%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(0, 0%, 4%);
+  --card: hsl(0, 0%, 6%);
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(0, 0%, 15%);
-  --input: hsl(0, 0%, 15%);
+  --border: hsl(0, 0%, 12%);
+  --input: hsl(0, 0%, 12%);
   --primary: hsl(0, 0%, 98%);
   --primary-foreground: hsl(0, 0%, 9%);
-  --secondary: hsl(0, 0%, 15%);
+  --secondary: hsl(0, 0%, 12%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(0, 0%, 15%);
+  --accent: hsl(0, 0%, 12%);
   --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62%, 30%);
   --destructive-foreground: hsl(0, 0%, 98%);

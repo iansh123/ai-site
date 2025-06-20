@@ -13,35 +13,35 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 z-50">
+    <header className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
       <nav className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="text-xl font-semibold text-gray-900">
+          <div className="text-xl font-bold text-foreground">
             IC AI Solutions
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
             <button 
               onClick={() => scrollToSection('home')}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Home
             </button>
             <button 
               onClick={() => scrollToSection('services')}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Services
             </button>
             <button 
               onClick={() => scrollToSection('about')}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               About
             </button>
             <button 
               onClick={() => scrollToSection('contact')}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Contact
             </button>
@@ -50,7 +50,7 @@ export default function Header() {
           <div className="md:hidden">
             <button 
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-muted-foreground hover:text-foreground"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -59,29 +59,29 @@ export default function Header() {
       </nav>
       
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100">
+        <div className="md:hidden bg-background border-t border-border">
           <div className="px-6 py-4 space-y-4">
             <button 
               onClick={() => scrollToSection('home')}
-              className="block text-gray-600 hover:text-gray-900 transition-colors"
+              className="block text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Home
             </button>
             <button 
               onClick={() => scrollToSection('services')}
-              className="block text-gray-600 hover:text-gray-900 transition-colors"
+              className="block text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Services
             </button>
             <button 
               onClick={() => scrollToSection('about')}
-              className="block text-gray-600 hover:text-gray-900 transition-colors"
+              className="block text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               About
             </button>
             <button 
               onClick={() => scrollToSection('contact')}
-              className="block text-gray-600 hover:text-gray-900 transition-colors"
+              className="block text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Contact
             </button>
