@@ -5,12 +5,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Admin from "@/pages/admin";
+import AdminLogin from "@/pages/admin-login";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/admin" component={Admin} />
+      <Route path="/admin-login" component={AdminLogin} />
       <Route path="*">
         <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
           <div className="text-center">
