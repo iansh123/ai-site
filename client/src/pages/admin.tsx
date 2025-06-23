@@ -38,6 +38,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import type { ContactSubmission, Client, Project, Notification } from "@shared/schema";
+import logoImage from "@assets/logo-color-code-0F2D45_1750696003186.png";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -100,6 +101,28 @@ export default function Admin() {
     queryKey: ["/api/notifications"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/notifications", null, {
+        Authorization: `Bearer ${localStorage.getItem("admin_token")}`
+      });
+      return response.json();
+    }
+  });
+
+  // Integrations Status Query
+  const { data: integrationsData } = useQuery({
+    queryKey: ["/api/integrations/status"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/integrations/status", null, {
+        Authorization: `Bearer ${localStorage.getItem("admin_token")}`
+      });
+      return response.json();
+    }
+  });
+
+  // AI Suggestions Query
+  const { data: aiSuggestionsData } = useQuery({
+    queryKey: ["/api/ai/suggestions"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/ai/suggestions", null, {
         Authorization: `Bearer ${localStorage.getItem("admin_token")}`
       });
       return response.json();
@@ -225,6 +248,8 @@ export default function Admin() {
   const projects = projectsData?.data || [];
   const notifications = notificationsData?.data || [];
   const stats = dashboardStats?.data || {};
+  const integrations = integrationsData?.data || {};
+  const aiSuggestions = aiSuggestionsData?.data || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -252,9 +277,7 @@ export default function Admin() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-muted rounded-lg">
-                <Settings className="h-6 w-6" />
-              </div>
+              <img src={logoImage} alt="IC AI Solutions" className="h-10 w-auto" />
               <div>
                 <h1 className="text-2xl font-bold">Admin Dashboard</h1>
                 <p className="text-muted-foreground">IC AI Solutions Management</p>
@@ -296,6 +319,10 @@ export default function Admin() {
             <TabsTrigger value="notifications">
               <Bell className="mr-2 h-4 w-4" />
               Notifications
+            </TabsTrigger>
+            <TabsTrigger value="integrations">
+              <Zap className="mr-2 h-4 w-4" />
+              Integrations
             </TabsTrigger>
             <TabsTrigger value="analytics">
               <TrendingUp className="mr-2 h-4 w-4" />
@@ -840,6 +867,112 @@ export default function Admin() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          {/* Integrations Tab */}
+          <TabsContent value="integrations" className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold">Business Integrations</h2>
+              <p className="text-muted-foreground">Manage your enterprise API connections and automations</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(integrations).map(([key, integration]: [string, any]) => (
+                <Card key={key}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-2 rounded-full ${integration.enabled ? "bg-green-100" : "bg-gray-100"}`}>
+                          <Zap className={`h-5 w-5 ${integration.enabled ? "text-green-600" : "text-gray-400"}`} />
+                        </div>
+                        <div>
+                          <CardTitle className="capitalize">{key}</CardTitle>
+                          <CardDescription>
+                            {integration.services?.join(", ") || "API Integration"}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant={integration.enabled ? "default" : "secondary"}
+                        className={integration.enabled ? "bg-green-500" : ""}
+                      >
+                        {integration.enabled ? "Connected" : "Disabled"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="text-sm text-muted-foreground">
+                        Services: {integration.services?.length || 0} available
+                      </div>
+                      {integration.enabled && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => {
+                            // Test integration
+                            toast({
+                              title: "Testing integration",
+                              description: `Testing ${key} connection...`
+                            });
+                          }}
+                        >
+                          Test Connection
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Zap className="mr-2 h-5 w-5" />
+                  AI Automation Suggestions
+                </CardTitle>
+                <CardDescription>Smart recommendations to improve your business workflows</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {aiSuggestions.map((suggestion: any, index: number) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{suggestion.title}</h4>
+                        <Badge 
+                          variant={
+                            suggestion.priority === "high" ? "destructive" : 
+                            suggestion.priority === "medium" ? "default" : "secondary"
+                          }
+                        >
+                          {suggestion.priority} priority
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {suggestion.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-green-600">
+                          {suggestion.estimated_impact}
+                        </span>
+                        <Button size="sm">
+                          Implement
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {aiSuggestions.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Zap className="mx-auto h-12 w-12 mb-4" />
+                      <p>No automation suggestions available yet</p>
+                      <p className="text-sm">Suggestions will appear as your business data grows</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Analytics Tab */}

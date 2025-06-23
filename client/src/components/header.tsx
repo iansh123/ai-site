@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "wouter";
+import logoImage from "@assets/logo-color-code-0F2D45_1750696003186.png";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,8 +18,9 @@ export default function Header() {
     <header className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
       <nav className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="text-xl font-bold text-foreground">
-            IC AI Solutions
+          <div className="flex items-center space-x-3">
+            <img src={logoImage} alt="IC AI Solutions" className="h-8 w-auto" />
+            <span className="text-xl font-bold text-foreground">IC AI Solutions</span>
           </div>
           
           <div className="hidden md:flex items-center space-x-8">

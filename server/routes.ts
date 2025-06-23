@@ -11,6 +11,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import axios from "axios";
+import { integrationManager } from "./integrations";
 
 // Admin authentication middleware
 const requireAuth = async (req: any, res: any, next: any) => {
@@ -141,19 +142,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertContactSubmissionSchema.parse(req.body);
       const submission = await storage.createContactSubmission(validatedData);
       
-      // Trigger n8n workflow for new contact
-      await triggerN8nWorkflow("new-contact", {
-        type: "new_contact",
-        contact: submission,
-        timestamp: new Date().toISOString()
-      });
-
+      // Process through all integrations
+      const integrationResults = await integrationManager.processNewContact(submission);
+      
       // Create notification for admin
       await storage.createNotification({
         type: "contact",
         title: "New Contact Submission",
         message: `New message from ${submission.name} (${submission.email})`,
-        metadata: { contactId: submission.id }
+        metadata: { contactId: submission.id, integrations: integrationResults }
       });
       
       res.json({ 
@@ -280,14 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // 404 handler for API routes
-  app.use("/api/*", (req, res) => {
-    res.status(404).json({
-      success: false,
-      message: "API endpoint not found",
-      path: req.path
-    });
-  });
+
 
   // Update contact submission
   app.patch("/api/contact/:id", requireAuth, async (req, res) => {
@@ -338,19 +328,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertClientSchema.parse(req.body);
       const client = await storage.createClient(validatedData);
       
-      // Trigger n8n workflow for new client
-      await triggerN8nWorkflow("new-client", {
-        type: "new_client",
-        client: client,
-        timestamp: new Date().toISOString()
-      });
+      // Process through integrations
+      const integrationResults = await integrationManager.processNewClient(client);
 
       // Create notification
       await storage.createNotification({
         type: "client",
         title: "New Client Added",
         message: `New client ${client.name} has been added to the system`,
-        metadata: { clientId: client.id }
+        metadata: { clientId: client.id, integrations: integrationResults }
       });
 
       res.json({
@@ -811,6 +797,305 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Integration management endpoints
+  app.get("/api/integrations/status", requireAuth, async (req, res) => {
+    try {
+      const status = integrationManager.getIntegrationStatus();
+      res.json({
+        success: true,
+        data: status
+      });
+    } catch (error) {
+      console.error("Error fetching integration status:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch integration status"
+      });
+    }
+  });
+
+  app.post("/api/integrations/test/:provider", requireAuth, async (req, res) => {
+    try {
+      const { provider } = req.params;
+      const { testData } = req.body;
+      
+      let result = null;
+      
+      switch (provider) {
+        case "slack":
+          // Test Slack integration
+          result = await integrationManager['slack'].sendWebhook("Test message from IC AI Solutions");
+          break;
+        case "teams":
+          // Test Teams integration
+          result = await integrationManager['teams'].sendMessage(
+            "Test Notification",
+            "This is a test message from IC AI Solutions admin panel"
+          );
+          break;
+        case "twilio":
+          // Test SMS (if admin phone provided)
+          if (process.env.ADMIN_PHONE) {
+            result = await integrationManager['twilio'].sendSMS(
+              process.env.ADMIN_PHONE,
+              "Test SMS from IC AI Solutions"
+            );
+          }
+          break;
+        default:
+          return res.status(400).json({
+            success: false,
+            message: "Unknown integration provider"
+          });
+      }
+      
+      res.json({
+        success: true,
+        data: result,
+        message: `${provider} integration test completed`
+      });
+    } catch (error) {
+      console.error(`Error testing ${req.params.provider} integration:`, error);
+      res.status(500).json({
+        success: false,
+        message: `Failed to test ${req.params.provider} integration`
+      });
+    }
+  });
+
+  // Advanced analytics endpoints
+  app.get("/api/analytics/conversion-funnel", requireAuth, async (req, res) => {
+    try {
+      const contacts = await storage.getAllContactSubmissions();
+      const clients = await storage.getAllClients();
+      const projects = await storage.getAllProjects();
+      
+      const funnel = {
+        leads: contacts.length,
+        qualified: contacts.filter(c => c.status === "contacted").length,
+        clients: clients.length,
+        activeProjects: projects.filter(p => p.status === "active").length,
+        totalRevenue: projects.reduce((sum, p) => sum + (p.budget || 0), 0)
+      };
+      
+      res.json({
+        success: true,
+        data: funnel
+      });
+    } catch (error) {
+      console.error("Error fetching conversion funnel:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch conversion funnel data"
+      });
+    }
+  });
+
+  app.get("/api/analytics/timeline", requireAuth, async (req, res) => {
+    try {
+      const { days = 30 } = req.query;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - parseInt(days as string));
+      
+      const contacts = await storage.getAllContactSubmissions();
+      const filteredContacts = contacts.filter(c => new Date(c.createdAt) >= startDate);
+      
+      // Group by day
+      const timeline = filteredContacts.reduce((acc: any, contact) => {
+        const date = new Date(contact.createdAt).toISOString().split('T')[0];
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+      }, {});
+      
+      res.json({
+        success: true,
+        data: timeline
+      });
+    } catch (error) {
+      console.error("Error fetching timeline data:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch timeline data"
+      });
+    }
+  });
+
+  // AI automation suggestions endpoint
+  app.get("/api/ai/suggestions", requireAuth, async (req, res) => {
+    try {
+      const contacts = await storage.getAllContactSubmissions();
+      const clients = await storage.getAllClients();
+      const projects = await storage.getAllProjects();
+      
+      const suggestions = [];
+      
+      // Analyze contact response time
+      const newContacts = contacts.filter(c => c.status === "new");
+      if (newContacts.length > 5) {
+        suggestions.push({
+          type: "automation",
+          title: "Contact Response Automation",
+          description: "Set up automated email responses for new contact submissions",
+          priority: "high",
+          estimated_impact: "Reduce response time by 90%"
+        });
+      }
+      
+      // Analyze conversion opportunities
+      const qualifiedContacts = contacts.filter(c => c.status === "contacted");
+      if (qualifiedContacts.length > 3) {
+        suggestions.push({
+          type: "crm",
+          title: "CRM Integration Enhancement",
+          description: "Implement automated lead scoring and nurturing workflows",
+          priority: "medium",
+          estimated_impact: "Increase conversion rate by 25%"
+        });
+      }
+      
+      // Project management suggestions
+      const activeProjects = projects.filter(p => p.status === "active");
+      if (activeProjects.length > 2) {
+        suggestions.push({
+          type: "project_management",
+          title: "Project Milestone Tracking",
+          description: "Automate project milestone notifications and progress tracking",
+          priority: "medium",
+          estimated_impact: "Improve project delivery time by 15%"
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: suggestions
+      });
+    } catch (error) {
+      console.error("Error generating AI suggestions:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate AI suggestions"
+      });
+    }
+  });
+
+  // Bulk operations endpoints
+  app.post("/api/bulk/export", requireAuth, async (req, res) => {
+    try {
+      const { type, format = "csv" } = req.body;
+      
+      let data: any[] = [];
+      let filename = "";
+      
+      switch (type) {
+        case "contacts":
+          data = await storage.getAllContactSubmissions();
+          filename = `contacts_export_${new Date().toISOString().split('T')[0]}.${format}`;
+          break;
+        case "clients":
+          data = await storage.getAllClients();
+          filename = `clients_export_${new Date().toISOString().split('T')[0]}.${format}`;
+          break;
+        case "projects":
+          data = await storage.getAllProjects();
+          filename = `projects_export_${new Date().toISOString().split('T')[0]}.${format}`;
+          break;
+        default:
+          return res.status(400).json({
+            success: false,
+            message: "Invalid export type"
+          });
+      }
+      
+      // Convert to CSV format
+      if (format === "csv" && data.length > 0) {
+        const headers = Object.keys(data[0]).join(",");
+        const rows = data.map(item => 
+          Object.values(item).map(value => 
+            typeof value === "string" ? `"${value.replace(/"/g, '""')}"` : value
+          ).join(",")
+        );
+        const csvContent = [headers, ...rows].join("\n");
+        
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.send(csvContent);
+      } else {
+        res.json({
+          success: true,
+          data,
+          filename
+        });
+      }
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to export data"
+      });
+    }
+  });
+
+  // Workflow automation endpoints
+  app.post("/api/workflows/trigger", requireAuth, async (req, res) => {
+    try {
+      const { workflowType, targetId, parameters } = req.body;
+      
+      let result = null;
+      
+      switch (workflowType) {
+        case "follow_up_sequence":
+          // Trigger follow-up email sequence
+          const contact = await storage.getContactSubmission(targetId);
+          if (contact) {
+            // Create calendar reminder
+            result = { message: `Follow-up sequence initiated for ${contact.name}` };
+            
+            // Create notification
+            await storage.createNotification({
+              type: "workflow",
+              title: "Follow-up Sequence Started",
+              message: `Automated follow-up sequence started for ${contact.name}`,
+              metadata: { contactId: targetId, workflowType }
+            });
+          }
+          break;
+          
+        case "client_onboarding":
+          // Trigger client onboarding workflow
+          const client = await storage.getClient(targetId);
+          if (client) {
+            result = { message: `Onboarding workflow initiated for ${client.name}` };
+            
+            await storage.createNotification({
+              type: "workflow",
+              title: "Client Onboarding Started",
+              message: `Onboarding workflow started for ${client.name}`,
+              metadata: { clientId: targetId, workflowType }
+            });
+          }
+          break;
+          
+        default:
+          return res.status(400).json({
+            success: false,
+            message: "Unknown workflow type"
+          });
+      }
+      
+      res.json({
+        success: true,
+        data: result,
+        message: "Workflow triggered successfully"
+      });
+    } catch (error) {
+      console.error("Error triggering workflow:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to trigger workflow"
+      });
+    }
+  });
+
   // N8n webhook endpoint
   app.post("/api/webhooks/n8n", async (req, res) => {
     try {
@@ -849,6 +1134,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to process webhook"
       });
     }
+  });
+
+  // 404 handler for API routes
+  app.use("/api/*", (req, res) => {
+    res.status(404).json({
+      success: false,
+      message: "API endpoint not found",
+      path: req.path
+    });
   });
 
   const httpServer = createServer(app);
