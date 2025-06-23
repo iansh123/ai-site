@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +46,11 @@ export default function Header() {
             >
               Contact
             </button>
+            <Link href="/admin">
+              <span className="text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer">
+                Admin
+              </span>
+            </Link>
           </div>
           
           <div className="md:hidden">
